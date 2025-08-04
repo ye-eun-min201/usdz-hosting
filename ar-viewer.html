@@ -1,61 +1,71 @@
-
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>AR Model Viewer</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AR Viewer Slider</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
-      body {
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: #fff;
-      }
-      model-viewer {
-        width: 100%;
-        height: 90vh;
-      }
-      .buttons {
-        margin-top: 8px;
-      }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        .slider-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: scroll;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        .slide {
+            flex: 0 0 100%;
+            scroll-snap-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        model-viewer {
+            width: 100%;
+            height: 100%;
+        }
     </style>
-  </head>
-  <body>
-    <model-viewer id="viewer" ar ar-modes="scene-viewer webxr quick-look" auto-rotate camera-controls></model-viewer>
-
-    <div class="buttons">
-      <button onclick="prevModel()">← 이전</button>
-      <button onclick="nextModel()">다음 →</button>
+</head>
+<body>
+    <div class="slider-container" id="slider">
+        <!-- Slides will be inserted here -->
     </div>
 
     <script>
-      const urlParams = new URLSearchParams(window.location.search);
-      const models = urlParams.get("models")?.split(",") || [];
-      let currentIndex = 0;
+        const defaultModels = [
+            'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
+            'https://ye-eun-min201.github.io/usdz-hosting/coke02_2.glb',
+            'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb'
+        ];
 
-      const viewer = document.getElementById("viewer");
+        const query = new URLSearchParams(window.location.search);
+        const models = query.get('models');
 
-      function updateModel() {
-        viewer.src = models[currentIndex];
-      }
+        const modelList = models ? models.split(',').map(name => `https://ye-eun-min.github.io/usdz-hosting/${name}`) : defaultModels;
+        const container = document.getElementById('slider');
 
-      function nextModel() {
-        currentIndex = (currentIndex + 1) % models.length;
-        updateModel();
-      }
+        modelList.forEach((modelUrl, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'slide';
 
-      function prevModel() {
-        currentIndex = (currentIndex - 1 + models.length) % models.length;
-        updateModel();
-      }
+            const viewer = document.createElement('model-viewer');
+            viewer.setAttribute('src', modelUrl);
+            viewer.setAttribute('alt', `AR Model ${index + 1}`);
+            viewer.setAttribute('ar', '');
+            viewer.setAttribute('auto-rotate', '');
+            viewer.setAttribute('camera-controls', '');
+            viewer.setAttribute('shadow-intensity', '1');
+            viewer.setAttribute('ar-modes', 'scene-viewer webxr quick-look');
 
-      // 초기 로딩
-      if (models.length > 0) {
-        updateModel();
-      } else {
-        viewer.innerHTML = "<p>모델이 없습니다.</p>";
-      }
+            slide.appendChild(viewer);
+            container.appendChild(slide);
+        });
     </script>
-  </body>
+</body>
 </html>
