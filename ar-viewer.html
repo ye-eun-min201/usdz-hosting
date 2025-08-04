@@ -1,130 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AR Viewer Slider</title>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #fff;
-            font-family: sans-serif;
-        }
-        .slider-container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            overflow-x: scroll;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
-        }
-        .slide {
-            flex: 0 0 100%;
-            scroll-snap-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        model-viewer {
-            width: 100%;
-            height: 100%;
-        }
-        .slide-number {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .nav-buttons {
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            transform: translateY(-50%);
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
-        .nav-button {
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>AR Viewer Slider</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #fff;
+      font-family: sans-serif;
+    }
+    .viewer-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
+    .slide-number {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .nav-buttons {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    .nav-button {
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <div class="slider-container" id="slider">
-        <!-- Slides will be inserted here -->
-    </div>
+  <div class="viewer-container">
+    <model-viewer id="mainViewer"
+      alt="AR Model"
+      ar
+      auto-rotate
+      camera-controls
+      shadow-intensity="1"
+      ar-modes="scene-viewer webxr quick-look">
+    </model-viewer>
+    <div class="slide-number" id="slideNumber"></div>
     <div class="nav-buttons">
-        <button class="nav-button" onclick="prevSlide()">◀</button>
-        <button class="nav-button" onclick="nextSlide()">▶</button>
+      <button class="nav-button" onclick="prevSlide()">◀</button>
+      <button class="nav-button" onclick="nextSlide()">▶</button>
     </div>
+  </div>
 
-    <script>
-        const defaultModels = [
-            'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
-            'https://ye-eun-min201.github.io/usdz-hosting/coke02_1.glb',
-            'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb'
-        ];
+  <script>
+    const defaultModels = [
+      'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/coke02_2.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb'
+    ];
 
-        const query = new URLSearchParams(window.location.search);
-        const models = query.get('models');
+    const query = new URLSearchParams(window.location.search);
+    const models = query.get('models');
+    const modelList = models ? models.split(',').map(name => `https://ye-eun-min201.github.io/usdz-hosting/${name}`) : defaultModels;
 
-        const modelList = models ? models.split(',').map(name => `https://ye-eun-min201.github.io/usdz-hosting/${name}`) : defaultModels;
-        const container = document.getElementById('slider');
+    const viewer = document.getElementById('mainViewer');
+    const slideLabel = document.getElementById('slideNumber');
+    let currentIndex = 0;
 
-        modelList.forEach((modelUrl, index) => {
-            const slide = document.createElement('div');
-            slide.className = 'slide';
+    function updateViewer(index) {
+      if (index >= 0 && index < modelList.length) {
+        viewer.src = modelList[index];
+        slideLabel.textContent = `Model ${index + 1} / ${modelList.length}`;
+      }
+    }
 
-            const viewer = document.createElement('model-viewer');
-            viewer.setAttribute('src', modelUrl);
-            viewer.setAttribute('alt', `AR Model ${index + 1}`);
-            viewer.setAttribute('ar', '');
-            viewer.setAttribute('auto-rotate', '');
-            viewer.setAttribute('camera-controls', '');
-            viewer.setAttribute('shadow-intensity', '1');
-            viewer.setAttribute('ar-modes', 'scene-viewer webxr quick-look');
+    function nextSlide() {
+      if (currentIndex < modelList.length - 1) {
+        currentIndex++;
+        updateViewer(currentIndex);
+      }
+    }
 
-            const label = document.createElement('div');
-            label.className = 'slide-number';
-            label.textContent = `Model ${index + 1}`;
+    function prevSlide() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateViewer(currentIndex);
+      }
+    }
 
-            slide.appendChild(viewer);
-            slide.appendChild(label);
-            container.appendChild(slide);
-        });
-
-        let currentIndex = 0;
-        const scrollToIndex = (index) => {
-            const slider = document.getElementById('slider');
-            const slides = document.querySelectorAll('.slide');
-            if (index >= 0 && index < slides.length) {
-                currentIndex = index;
-                slider.scrollTo({ left: slides[index].offsetLeft, behavior: 'smooth' });
-            }
-        }
-
-        function nextSlide() {
-            scrollToIndex(currentIndex + 1);
-        }
-
-        function prevSlide() {
-            scrollToIndex(currentIndex - 1);
-        }
-    </script>
+    // 초기 로드
+    updateViewer(currentIndex);
+  </script>
 </body>
 </html>
