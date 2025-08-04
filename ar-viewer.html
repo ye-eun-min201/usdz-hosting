@@ -9,6 +9,7 @@
             margin: 0;
             overflow: hidden;
             background-color: #fff;
+            font-family: sans-serif;
         }
         .slider-container {
             display: flex;
@@ -25,10 +26,41 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
         model-viewer {
             width: 100%;
             height: 100%;
+        }
+        .slide-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .nav-buttons {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .nav-button {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -36,18 +68,22 @@
     <div class="slider-container" id="slider">
         <!-- Slides will be inserted here -->
     </div>
+    <div class="nav-buttons">
+        <button class="nav-button" onclick="prevSlide()">◀</button>
+        <button class="nav-button" onclick="nextSlide()">▶</button>
+    </div>
 
     <script>
         const defaultModels = [
             'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
-            'https://ye-eun-min201.github.io/usdz-hosting/coke02_2.glb',
+            'https://ye-eun-min201.github.io/usdz-hosting/coke02_1.glb',
             'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb'
         ];
 
         const query = new URLSearchParams(window.location.search);
         const models = query.get('models');
 
-        const modelList = models ? models.split(',').map(name => `https://ye-eun-min.github.io/usdz-hosting/${name}`) : defaultModels;
+        const modelList = models ? models.split(',').map(name => `https://ye-eun-min201.github.io/usdz-hosting/${name}`) : defaultModels;
         const container = document.getElementById('slider');
 
         modelList.forEach((modelUrl, index) => {
@@ -63,9 +99,32 @@
             viewer.setAttribute('shadow-intensity', '1');
             viewer.setAttribute('ar-modes', 'scene-viewer webxr quick-look');
 
+            const label = document.createElement('div');
+            label.className = 'slide-number';
+            label.textContent = `Model ${index + 1}`;
+
             slide.appendChild(viewer);
+            slide.appendChild(label);
             container.appendChild(slide);
         });
+
+        let currentIndex = 0;
+        const scrollToIndex = (index) => {
+            const slider = document.getElementById('slider');
+            const slides = document.querySelectorAll('.slide');
+            if (index >= 0 && index < slides.length) {
+                currentIndex = index;
+                slider.scrollTo({ left: slides[index].offsetLeft, behavior: 'smooth' });
+            }
+        }
+
+        function nextSlide() {
+            scrollToIndex(currentIndex + 1);
+        }
+
+        function prevSlide() {
+            scrollToIndex(currentIndex - 1);
+        }
     </script>
 </body>
 </html>
