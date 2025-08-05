@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -75,9 +75,19 @@
   <script>
     const defaultModels = [
       'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
-      'https://ye-eun-min201.github.io/usdz-hosting/coke02_2.glb',
-      'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb'
+      'https://ye-eun-min201.github.io/usdz-hosting/coke02_1.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_1.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_2.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_1.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_2.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',
+      'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb',
+
+
     ];
+
+    const menuName = '돈까스';
 
     const query = new URLSearchParams(window.location.search);
     const models = query.get('models');
@@ -90,7 +100,7 @@
     function updateViewer(index) {
       if (index >= 0 && index < modelList.length) {
         viewer.src = modelList[index];
-        slideLabel.textContent = `Model ${index + 1} / ${modelList.length}`;
+        slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
       }
     }
 
@@ -111,5 +121,208 @@
     // 초기 로드
     updateViewer(currentIndex);
   </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AR Viewer Slider</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #fff;
+      font-family: sans-serif;
+    }
+    .viewer-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
+    .slide-number {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .nav-buttons {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    .nav-button {
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewer-container">
+    <model-viewer id="mainViewer"
+      alt="AR Model"
+      ar
+      auto-rotate
+      camera-controls
+      shadow-intensity="1"
+      ar-modes="scene-viewer webxr quick-look">
+    </model-viewer>
+    <div class="slide-number" id="slideNumber"></div>
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="prevSlide()">◀</button>
+      <button class="nav-button" onclick="nextSlide()">▶</button>
+    </div>
+  </div>
+
+  <!-- <script>
+    // 햄버거, 감자튀김, 콜라 파일 리스트 지정
+    const menuModelMap = {
+      '햄버거': [
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_2.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_2.glb'
+      ],
+      '감자튀김': [
+        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb'
+      ],
+      '콜라': [
+        'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/coke02_1.glb'
+      ]
+    };
+
+    // 기본값(돈까스, 예시)
+    const defaultModels = [
+      'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb'
+    ];
+
+    // URL 파라미터로 메뉴명 받기 (예: ?menu=햄버거)
+    const query = new URLSearchParams(window.location.search);
+    const menuName = query.get('menu') || '돈까스'; // 없으면 돈까스
+
+    // models 파라미터로 직접 파일 리스트를 전달하는 경우 우선 적용
+    const modelsParam = query.get('models');
+    const modelList = modelsParam
+      ? modelsParam.split(',').map(name => `https://ye-eun-min201.github.io/usdz-hosting/${name}`)
+      : (menuModelMap[menuName] || defaultModels);
+
+    const viewer = document.getElementById('mainViewer');
+    const slideLabel = document.getElementById('slideNumber');
+    let currentIndex = 0;
+
+    function updateViewer(index) {
+      if (index >= 0 && index < modelList.length) {
+        viewer.src = modelList[index];
+        slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
+      }
+    }
+
+    function nextSlide() {
+      if (currentIndex < modelList.length - 1) {
+        currentIndex++;
+        updateViewer(currentIndex);
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateViewer(currentIndex);
+      }
+    }
+
+    // 초기 로드
+    updateViewer(currentIndex);
+  </script> -->
+
+
+
+  <script>
+    // 메뉴별 glb 파일 매핑
+    const menuModelMap = {
+      '돈까스': [
+        // 'https://ye-eun-min201.github.io/usdz-hosting/donkatsu1.glb',
+        // 'https://ye-eun-min201.github.io/usdz-hosting/donkatsu2.glb'
+      ],
+      '햄버거': [
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_2.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_2.glb'
+      ],
+      '감자튀김': [
+        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb'
+      ],
+      '콜라': [
+        'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
+        'https://ye-eun-min201.github.io/usdz-hosting/coke02_1.glb'
+      ]
+    };
+  
+    // URL 파라미터에서 menu 값 추출
+    const query = new URLSearchParams(window.location.search);
+    const menuName = query.get('menu') || '햄버거'; // 기본값 '햄버거'
+  
+    // menu 값에 맞는 glb 배열 선택, 없으면 '햄버거'로
+    const modelList = menuModelMap[menuName] || menuModelMap['햄버거'];
+  
+    // 이하 동일
+    const viewer = document.getElementById('mainViewer');
+    const slideLabel = document.getElementById('slideNumber');
+    let currentIndex = 0;
+  
+    function updateViewer(index) {
+      if (index >= 0 && index < modelList.length) {
+        viewer.src = modelList[index];
+        slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
+      }
+    }
+  
+    function nextSlide() {
+      if (currentIndex < modelList.length - 1) {
+        currentIndex++;
+        updateViewer(currentIndex);
+      }
+    }
+  
+    function prevSlide() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateViewer(currentIndex);
+      }
+    }
+  
+    // 초기 로드
+    updateViewer(currentIndex);
+  </script>
+  
 </body>
 </html>
