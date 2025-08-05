@@ -267,10 +267,10 @@
   <script>
     // 메뉴별 glb 파일 매핑
     const menuModelMap = {
-      '돈까스': [
-        // 'https://ye-eun-min201.github.io/usdz-hosting/donkatsu1.glb',
-        // 'https://ye-eun-min201.github.io/usdz-hosting/donkatsu2.glb'
-      ],
+      // '돈까스': [
+      //   'https://ye-eun-min201.github.io/usdz-hosting/donkatsu1.glb',
+      //   'https://ye-eun-min201.github.io/usdz-hosting/donkatsu2.glb'
+      // ],
       '햄버거': [
         'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_1.glb',
         'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_2.glb',
@@ -278,34 +278,44 @@
         'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_2.glb'
       ],
       '감자튀김': [
-        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',
-        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb'
-      ],
+    {
+      glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',
+      usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.usdz',
+    },
+    {
+      glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb',
+      usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.usdz',
+    }
+  ],
       '콜라': [
         'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
         'https://ye-eun-min201.github.io/usdz-hosting/coke02_1.glb'
       ]
     };
   
-    // URL 파라미터에서 menu 값 추출
-    const query = new URLSearchParams(window.location.search);
-    const menuName = query.get('menu') || '햄버거'; // 기본값 '햄버거'
-  
-    // menu 값에 맞는 glb 배열 선택, 없으면 '햄버거'로
-    const modelList = menuModelMap[menuName] || menuModelMap['햄버거'];
-  
-    // 이하 동일
-    const viewer = document.getElementById('mainViewer');
-    const slideLabel = document.getElementById('slideNumber');
-    let currentIndex = 0;
-  
-    function updateViewer(index) {
-      if (index >= 0 && index < modelList.length) {
-        viewer.src = modelList[index];
-        slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
-      }
+ 
+const query = new URLSearchParams(window.location.search);
+const menuName = query.get('menu') || '감자튀김';
+const modelList = menuModelMap[menuName] || [];
+
+const viewer = document.getElementById('mainViewer');
+const slideLabel = document.getElementById('slideNumber');
+let currentIndex = 0;
+
+
+
+function updateViewer(index) {
+  if (index >= 0 && index < modelList.length) {
+    const model = modelList[index];
+    viewer.src = model.glb || model.usdz || '';
+    if (model.usdz) {
+      viewer.setAttribute('ios-src', model.usdz);
+    } else {
+      viewer.removeAttribute('ios-src');
     }
-  
+    slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
+  }
+}
     function nextSlide() {
       if (currentIndex < modelList.length - 1) {
         currentIndex++;
