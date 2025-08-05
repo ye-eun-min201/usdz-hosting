@@ -279,8 +279,8 @@
       ],
       '감자튀김': [
     {
-      glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',
-      usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.usdz',
+      glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',  //원래 감자튀김 파일 
+      usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.usdz', //웃고있는 감자튀김 파일
     },
     {
       glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb',
@@ -307,27 +307,52 @@ const slideLabel = document.getElementById('slideNumber');
 let currentIndex = 0;
 
 
+function isIOS() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+
+// function updateViewer(index) {
+//   if (index >= 0 && index < modelList.length) {
+//     const model = modelList[index];
+//     viewer.src = model.glb || model.usdz || '';
+//     if (model.usdz) {
+//       viewer.setAttribute('ios-src', model.usdz);
+//     } else {
+//       viewer.removeAttribute('ios-src');
+//     }
+//     slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
+//   }
+// }
+//     function nextSlide() {
+//       if (currentIndex < modelList.length - 1) {
+//         currentIndex++;
+//         updateViewer(currentIndex);
+//       }
+//     }
+  
+
 
 function updateViewer(index) {
   if (index >= 0 && index < modelList.length) {
     const model = modelList[index];
-    viewer.src = model.glb || model.usdz || '';
-    if (model.usdz) {
+    if (isIOS() && model.usdz) {
+      // iOS면 미리보기(src)도 usdz로!
+      viewer.src = model.usdz;
       viewer.setAttribute('ios-src', model.usdz);
     } else {
-      viewer.removeAttribute('ios-src');
+      viewer.src = model.glb || model.usdz || '';
+      if (model.usdz) {
+        viewer.setAttribute('ios-src', model.usdz);
+      } else {
+        viewer.removeAttribute('ios-src');
+      }
     }
     slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
   }
 }
-    function nextSlide() {
-      if (currentIndex < modelList.length - 1) {
-        currentIndex++;
-        updateViewer(currentIndex);
-      }
-    }
-  
-    function prevSlide() {
+
+function prevSlide() {
       if (currentIndex > 0) {
         currentIndex--;
         updateViewer(currentIndex);
