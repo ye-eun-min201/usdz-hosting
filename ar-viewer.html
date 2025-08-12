@@ -1,81 +1,185 @@
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <title>AR Viewer Slider</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background-color: #fff;
-      font-family: sans-serif;
+    /* ===== Paperlogy 웹폰트 등록 ===== */
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('./fonts/Paperlogy-4Regular.ttf') format('truetype');
+      font-weight: 400; font-style: normal; font-display: swap;
     }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('./fonts/Paperlogy-5Medium.ttf') format('truetype');
+      font-weight: 500; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('./fonts/Paperlogy-6SemiBold.ttf') format('truetype');
+      font-weight: 600; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('./fonts/Paperlogy-7Bold.ttf') format('truetype');
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+    :root { --app-font: 'Paperlogy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', Arial, sans-serif; }
+    html, body, button, input, select, textarea { font-family: var(--app-font); }
+
+    /* ===== 상단 헤더 ===== */
+    body { margin: 0; background: #fff; }
+    .ar-viewer-header {
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; background: #006DF0; color: #fff;
+      height: 100px; font-size: 48px; font-weight: 400; text-align: center;
+    }
+
+    /* ===== 뷰어 영역 ===== */
     .viewer-container {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      width: 100vw; height: calc(100vh - 100px);
+      position: relative; display: flex; justify-content: center; align-items: center;
+      overflow: hidden;
     }
-    model-viewer {
-      width: 100%;
-      height: 100%;
+    model-viewer { width: 100%; height: 100%; }
+
+ /* 상단 안내 문구 스타일 */
+.slide-number {
+  position: absolute;
+  width: 90%;
+  justify-content: center;
+  align-items: center;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  background-color: rgba(209, 209, 209, 0.7);
+
+  color: #010101;                    /* 검은색 글자 */
+  padding: 24px;
+  border-radius: 1000px;
+  font-size: 28px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  
+}
+
+
+    /* AR 버튼 (slot="ar-button") */
+    .ar-cta {
+    position: absolute;
+    bottom: 270px; /* 카드 높이 + 여유 */
+    left: 88%;
+    transform: translateX(-50%);
+    padding: 12px;
+    border: 0;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 400;
+    background: #006DF0;
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 5;
+  
+  }
+
+
+    .ar-cta:active {
+    transform: translateX(-50%) scale(0.98);
+}
+    /* 가장자리 스와이프 영역 */
+    .edge-swipe {
+      position: absolute; top: 0; bottom: 0; width: 20vw; z-index: 5;
+      background: transparent; touch-action: none;
     }
-    .slide-number {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.6);
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 14px;
+    .edge-left  { left: 0; }
+    .edge-right { right: 0; }
+    @media (hover:hover){
+      .edge-left:hover  { background: linear-gradient(90deg, rgba(0,0,0,.15), transparent); }
+      .edge-right:hover { background: linear-gradient(270deg, rgba(0,0,0,.15), transparent); }
     }
-    .nav-buttons {
-      position: absolute;
-      top: 50%;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      transform: translateY(-50%);
-      padding: 0 20px;
-      box-sizing: border-box;
+
+    /* ===== 하단 정보 카드 (가게/음식/별점) ===== */
+    .info-card{
+      position:absolute; bottom:20px; 
+      /* AR 버튼과 간격 확보 */
+      width: 94%;
+      height: 200px;
+      left: 0%;
+      margin-left: 12px;
+      z-index:3; display:flex; gap:14px; align-items:center;
+      padding:12px; border-radius:16px;
+      background: rgba(255,255,255,0.78);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
     }
-    .nav-button {
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-      cursor: pointer;
+    .info-thumb{
+      width:220px; height:150px; object-fit:cover; border-radius:30px; background:#ddd;
+      display: flex; margin-bottom: 20px;
+      flex-shrink:0;
+      margin-right: 20px;
     }
+    .info-meta{ display:flex; flex-direction:column; gap:6px; overflow:hidden; }
+    .info-title{
+      font-weight:700; font-size:34px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom: 10px;
+    }
+    .info-sub{
+      font-weight:500; font-size:28px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .info-rating{ display:flex; align-items:center; gap:6px; font-size:14px; }
+    .star{ font-size:28px; line-height:1; color:#FFC107; }
+    .score{ font-weight:700; font-size:20px; }
+    .reviews{ opacity:.65;  font-size:20px; }
   </style>
 </head>
 <body>
+  <header class="ar-viewer-header">
+    <span id="modeTitle">가게 별로 비교하기</span>
+  </header>
+
   <div class="viewer-container">
     <model-viewer id="mainViewer"
       alt="AR Model"
       ar
-      auto-rotate
+      ar-modes="scene-viewer webxr quick-look"
       camera-controls
+      auto-rotate
       shadow-intensity="1"
-      ar-modes="scene-viewer webxr quick-look">
+      interaction-prompt="auto"
+      interaction-prompt-style="basic">
+      <button slot="ar-button" class="ar-cta">AR로 보기</button>
     </model-viewer>
+
     <div class="slide-number" id="slideNumber"></div>
-    <div class="nav-buttons">
-      <button class="nav-button" onclick="prevSlide()">◀</button>
-      <button class="nav-button" onclick="nextSlide()">▶</button>
+
+    <!-- 가장자리 스와이프 영역 -->
+    <div id="edgeLeft"  class="edge-swipe edge-left"></div>
+    <div id="edgeRight" class="edge-swipe edge-right"></div>
+
+    <!-- 하단 정보 카드 -->
+    <div class="info-card" id="infoCard">
+      <img id="infoThumb" class="info-thumb" alt="메뉴 썸네일" />
+      <div class="info-meta">
+        <div class="info-title" id="infoTitle">가게이름</div>
+        <div class="info-sub" id="infoSub">음식명</div>
+        <div class="info-rating">
+          <span class="star">★</span>
+          <span class="score" id="infoScore">0.0</span>
+          <span class="reviews" id="infoReviews">(0)</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- <script>
-    // 햄버거, 감자튀김, 콜라 파일 리스트 지정
+
+
+  <script>
+    /* ===== 모델 리스트 ===== */
     const menuModelMap = {
       '햄버거': [
         'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_1.glb',
@@ -84,8 +188,9 @@
         'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_2.glb'
       ],
       '감자튀김': [
-        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',
-        'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb'
+        { glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb', usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.usdz' },
+        { glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb', usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.usdz' },
+        { glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries03_1.glb', usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries03_1.usdz' }
       ],
       '콜라': [
         'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
@@ -93,30 +198,92 @@
       ]
     };
 
-    // 기본값(돈까스, 예시)
-    const defaultModels = [
-      'https://ye-eun-min201.github.io/usdz-hosting/ramen1.glb'
-    ];
+    /* ===== 표시용 메타데이터(카드 내용) ===== */
+    const modelMeta = {
+      '감자튀김': [
+        { shop: '감튀장인 성북점', food: '시그니처 감자튀김', score: 4.9, reviews: 777,
+          thumb: 'https://ye-eun-min201.github.io/usdz-hosting/thumbs/frenchFries01.jpg' },
+        { shop: '감튀장인 성북점', food: '스파이시 감자튀김', score: 4.8, reviews: 512,
+          thumb: 'https://ye-eun-min201.github.io/usdz-hosting/thumbs/frenchFries02.jpg' },
+        { shop: '감튀장인 성북점', food: '스마일 감자튀김', score: 4.7, reviews: 231,
+          thumb: 'https://ye-eun-min201.github.io/usdz-hosting/thumbs/frenchFries03.jpg' }
+      ],
+      '햄버거': [
+        { shop: '버거연구소 동대문점', food: '더블 치즈 버거', score: 4.9, reviews: 999,
+          thumb: 'https://ye-eun-min201.github.io/usdz-hosting/thumbs/hamburger01.jpg' },
+        { shop: '버거연구소 동대문점', food: '스모키 베이컨 버거', score: 4.8, reviews: 845,
+          thumb: 'https://ye-eun-min201.github.io/usdz-hosting/thumbs/hamburger02.jpg' },
+        { shop: '버거연구소 동대문점', food: '아보카도 버거', score: 4.7, reviews: 612,
+          thumb: 'https://ye-eun-min201.github.io/usdz-hosting/thumbs/hamburger03.jpg' },
+        { shop: '버거연구소 동대문점', food: '트리플 버거', score: 4.6, reviews: 401,
+          thumb: 'https://ye-eun-min201.github.io/usdz-hosting/thumbs/hamburger04.jpg' }
+      ],
+      '콜라': [
+        { shop:'콜라하우스', food:'콜라 355ml', score:4.6, reviews:123,
+          thumb:'https://ye-eun-min201.github.io/usdz-hosting/thumbs/coke01.jpg' },
+        { shop:'콜라하우스', food:'제로 콜라 355ml', score:4.7, reviews:256,
+          thumb:'https://ye-eun-min201.github.io/usdz-hosting/thumbs/coke02.jpg' }
+      ]
+    };
 
-    // URL 파라미터로 메뉴명 받기 (예: ?menu=햄버거)
+    /* ===== 초기값/요소 ===== */
     const query = new URLSearchParams(window.location.search);
-    const menuName = query.get('menu') || '돈까스'; // 없으면 돈까스
+    const menuName = query.get('menu') || '감자튀김';
+    const modelList = menuModelMap[menuName] || [];
 
-    // models 파라미터로 직접 파일 리스트를 전달하는 경우 우선 적용
-    const modelsParam = query.get('models');
-    const modelList = modelsParam
-      ? modelsParam.split(',').map(name => `https://ye-eun-min201.github.io/usdz-hosting/${name}`)
-      : (menuModelMap[menuName] || defaultModels);
+    const viewer      = document.getElementById('mainViewer');
+    const slideLabel  = document.getElementById('slideNumber');
+    const modeTitle   = document.getElementById('modeTitle');
 
-    const viewer = document.getElementById('mainViewer');
-    const slideLabel = document.getElementById('slideNumber');
+    const infoTitle   = document.getElementById('infoTitle');
+    const infoSub     = document.getElementById('infoSub');
+    const infoScore   = document.getElementById('infoScore');
+    const infoReviews = document.getElementById('infoReviews');
+    const infoThumb   = document.getElementById('infoThumb');
+
     let currentIndex = 0;
+    const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    /* ===== 뷰어/카드 갱신 ===== */
+    function updateInfoCard(menu, index){
+      const list = modelMeta[menu];
+      if (!list || !list[index]) {
+        infoTitle.textContent = menu;
+        infoSub.textContent = '';
+        infoScore.textContent = '';
+        infoReviews.textContent = '';
+        infoThumb.src = '';
+        return;
+      }
+      const meta = list[index];
+      infoTitle.textContent   = meta.shop;
+      infoSub.textContent     = meta.food;
+      infoScore.textContent   = meta.score.toFixed(1);
+      infoReviews.textContent = `(${meta.reviews})`;
+      infoThumb.src           = meta.thumb;
+      infoThumb.alt           = meta.food;
+    }
 
     function updateViewer(index) {
-      if (index >= 0 && index < modelList.length) {
-        viewer.src = modelList[index];
-        slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
+      if (index < 0 || index >= modelList.length) return;
+
+      const model = modelList[index];
+      if (typeof model === 'string') {
+        viewer.src = model;
+        viewer.removeAttribute('ios-src');
+      } else {
+        if (isIOS() && model.usdz) {
+          viewer.src = model.usdz;
+          viewer.setAttribute('ios-src', model.usdz);
+        } else {
+          viewer.src = model.glb || model.usdz || '';
+          if (model.usdz) viewer.setAttribute('ios-src', model.usdz);
+          else viewer.removeAttribute('ios-src');
+        }
       }
+
+      slideLabel.textContent = '왼쪽이나 오른쪽으로 넘겨 비교해 보세요!';
+
     }
 
     function nextSlide() {
@@ -125,7 +292,6 @@
         updateViewer(currentIndex);
       }
     }
-
     function prevSlide() {
       if (currentIndex > 0) {
         currentIndex--;
@@ -135,108 +301,40 @@
 
     // 초기 로드
     updateViewer(currentIndex);
-  </script> -->
 
+    // AR 상태에 따른 헤더 문구 전환
+    viewer.addEventListener('ar-status', (e) => {
+      const s = e.detail.status;
+      if (s === 'session-started') modeTitle.textContent = 'AR 제공중';
+      else if (s === 'not-presenting' || s === 'failed') modeTitle.textContent = '가게 별로 비교하기';
+    });
 
-
-  <script>
-    // 메뉴별 glb 파일 매핑
-    const menuModelMap = {
-      // '돈까스': [
-      //   'https://ye-eun-min201.github.io/usdz-hosting/donkatsu1.glb',
-      //   'https://ye-eun-min201.github.io/usdz-hosting/donkatsu2.glb'
-      // ],
-      '햄버거': [
-        'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_1.glb',
-        'https://ye-eun-min201.github.io/usdz-hosting/hambuger01_2.glb',
-        'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_1.glb',
-        'https://ye-eun-min201.github.io/usdz-hosting/hambuger02_2.glb'
-      ],
-      '감자튀김': [
-    {
-      glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.glb',  //원래 감자튀김 파일 
-      usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries01_1.usdz', //웃고있는 감자튀김 파일
-    },
-    {
-      glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.glb',
-      usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries02_1.usdz',
-    },
-    {
-      glb: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries03_1.glb',
-      usdz: 'https://ye-eun-min201.github.io/usdz-hosting/frenchFries03_1.usdz',
+    // 가장자리 스와이프
+    function bindEdgeSwipe(el) {
+      let sx=0, sy=0, moved=false;
+      el.addEventListener('touchstart', e=>{
+        sx = e.touches[0].clientX;
+        sy = e.touches[0].clientY;
+        moved=false;
+      }, {passive:true});
+      el.addEventListener('touchmove', ()=> moved=true, {passive:true});
+      el.addEventListener('touchend', e=>{
+        if (!moved) return;
+        const dx = e.changedTouches[0].clientX - sx;
+        const dy = e.changedTouches[0].clientY - sy;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+          if (dx < 0) nextSlide(); else prevSlide();
+        }
+      }, {passive:true});
     }
-  ],
-      '콜라': [
-        'https://ye-eun-min201.github.io/usdz-hosting/coke01_1.glb',
-        'https://ye-eun-min201.github.io/usdz-hosting/coke02_1.glb'
-      ]
-    };
-  
- 
-const query = new URLSearchParams(window.location.search);
-const menuName = query.get('menu') || '감자튀김';
-const modelList = menuModelMap[menuName] || [];
+    bindEdgeSwipe(document.getElementById('edgeLeft'));
+    bindEdgeSwipe(document.getElementById('edgeRight'));
 
-const viewer = document.getElementById('mainViewer');
-const slideLabel = document.getElementById('slideNumber');
-let currentIndex = 0;
-
-
-function isIOS() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-
-// function updateViewer(index) {
-//   if (index >= 0 && index < modelList.length) {
-//     const model = modelList[index];
-//     viewer.src = model.glb || model.usdz || '';
-//     if (model.usdz) {
-//       viewer.setAttribute('ios-src', model.usdz);
-//     } else {
-//       viewer.removeAttribute('ios-src');
-//     }
-//     slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
-//   }
-// }
-//     function nextSlide() {
-//       if (currentIndex < modelList.length - 1) {
-//         currentIndex++;
-//         updateViewer(currentIndex);
-//       }
-//     }
-  
-
-
-function updateViewer(index) {
-  if (index >= 0 && index < modelList.length) {
-    const model = modelList[index];
-    if (isIOS() && model.usdz) {
-      // iOS면 미리보기(src)도 usdz로!
-      viewer.src = model.usdz;
-      viewer.setAttribute('ios-src', model.usdz);
-    } else {
-      viewer.src = model.glb || model.usdz || '';
-      if (model.usdz) {
-        viewer.setAttribute('ios-src', model.usdz);
-      } else {
-        viewer.removeAttribute('ios-src');
-      }
-    }
-    slideLabel.textContent = `오늘의 메뉴!!! ${menuName} ${index + 1} / ${modelList.length}`;
-  }
-}
-
-function prevSlide() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        updateViewer(currentIndex);
-      }
-    }
-  
-    // 초기 로드
-    updateViewer(currentIndex);
+    // (옵션) 데스크톱 키보드 화살표
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  prevSlide();
+      if (e.key === 'ArrowRight') nextSlide();
+    });
   </script>
-  
 </body>
 </html>
