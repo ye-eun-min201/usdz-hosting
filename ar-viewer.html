@@ -228,7 +228,7 @@
 
     /* ===== 초기값/요소 ===== */
     const query = new URLSearchParams(window.location.search);
-    const menuName = query.get('menu') || '감자튀김';
+    const menuName = query.get('menu') || '햄버거';
     const modelList = menuModelMap[menuName] || [];
 
     const viewer      = document.getElementById('mainViewer');
