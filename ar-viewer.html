@@ -46,55 +46,49 @@
     }
     model-viewer { width: 100%; height: 100%; }
 
- /* 상단 안내 문구 스타일 */
-.slide-number {
-  position: absolute;
-  width: 90%;
-  justify-content: center;
-  align-items: center;
-  top: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  background-color: rgba(209, 209, 209, 0.7);
+    /* 상단 안내 문구 스타일 */
+    .slide-number {
+      position: absolute;
+      width: 90%;
+      justify-content: center;
+      align-items: center;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      background-color: rgba(209, 209, 209, 0.7);
+      color: #010101;
+      padding: 24px;
+      border-radius: 1000px;
+      font-size: 28px;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+    }
 
-  color: #010101;                    /* 검은색 글자 */
-  padding: 24px;
-  border-radius: 1000px;
-  font-size: 28px;
-  font-weight: 500;
-  text-align: center;
-  white-space: nowrap;
-  
-}
-
-
-    /* AR 버튼 (slot="ar-button") */
+    /* AR 버튼 (slot="ar-button") — 최상단으로 올림 */
     .ar-cta {
-    position: absolute;
-    bottom: 270px; /* 카드 높이 + 여유 */
-    left: 88%;
-    transform: translateX(-50%);
-    padding: 12px;
-    border: 0;
-    border-radius: 999px;
-    font-size: 18px;
-    font-weight: 400;
-    background: #006DF0;
-    color: #fff;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-    cursor: pointer;
-    z-index: 5;
-  
-  }
+      position: absolute;
+      bottom: 270px; /* 카드 높이 + 여유 */
+      left: 88%;
+      transform: translateX(-50%);
+      padding: 12px;
+      border: 0;
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 400;
+      background: #006DF0;
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+      cursor: pointer;
+      z-index: 9999; /* ★ 변경: 버튼이 항상 최상단 */
+    }
+    .ar-cta:active { transform: translateX(-50%) scale(0.98); }
 
-
-    .ar-cta:active {
-    transform: translateX(-50%) scale(0.98);
-}
-    /* 가장자리 스와이프 영역 */
+    /* 가장자리 스와이프 영역 — 버튼보다 아래로 내림 */
     .edge-swipe {
-      position: absolute; top: 0; bottom: 0; width: 20vw; z-index: 5;
+      position: absolute; top: 0; bottom: 0; width: 20vw;
+      z-index: 2; /* ★ 변경: 기존 5 → 2 */
       background: transparent; touch-action: none;
     }
     .edge-left  { left: 0; }
@@ -106,8 +100,7 @@
 
     /* ===== 하단 정보 카드 (가게/음식/별점) ===== */
     .info-card{
-      position:absolute; bottom:20px; 
-      /* AR 버튼과 간격 확보 */
+      position:absolute; bottom:20px;
       width: 94%;
       height: 200px;
       left: 0%;
@@ -176,8 +169,6 @@
     </div>
   </div>
 
-
-
   <script>
     /* ===== 모델 리스트 ===== */
     const menuModelMap = {
@@ -242,7 +233,6 @@
     const infoThumb   = document.getElementById('infoThumb');
 
     let currentIndex = 0;
-    const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     /* ===== 뷰어/카드 갱신 ===== */
     function updateInfoCard(menu, index){
@@ -264,29 +254,37 @@
       infoThumb.alt           = meta.food;
     }
 
+    /* ===== 핵심: src=GLB, ios-src=USDZ 규칙 유지 ===== */
     function updateViewer(index) {
       if (index < 0 || index >= modelList.length) return;
 
       const model = modelList[index];
+      let glb = null, usdz = null;
+
       if (typeof model === 'string') {
-        viewer.src = model;
-        viewer.removeAttribute('ios-src');
+        // 문자열이면 GLB만 있는 케이스로 간주
+        glb = model;
+      } else if (model && typeof model === 'object') {
+        glb = model.glb || null;
+        usdz = model.usdz || null;
+      }
+
+      if (glb) {
+        viewer.src = glb;                 // 항상 GLB를 src에
+      } else if (usdz) {
+        viewer.src = usdz;                // GLB가 전혀 없을 때만 예외적으로
       } else {
-        if (isIOS() && model.usdz) {
-          viewer.src = model.usdz;
-          viewer.setAttribute('ios-src', model.usdz);
-        } else {
-          viewer.src = model.glb || model.usdz || '';
-          if (model.usdz) viewer.setAttribute('ios-src', model.usdz);
-          else viewer.removeAttribute('ios-src');
-        }
+        viewer.removeAttribute('src');
+      }
+
+      if (usdz) {
+        viewer.setAttribute('ios-src', usdz);  // iOS 전용 자산
+      } else {
+        viewer.removeAttribute('ios-src');
       }
 
       slideLabel.textContent = '왼쪽이나 오른쪽으로 넘겨 비교해 보세요!';
-
       updateInfoCard(menuName, index);
-
-
     }
 
     function nextSlide() {
