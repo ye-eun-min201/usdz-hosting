@@ -103,13 +103,17 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const modelName = urlParams.get('model') || 'hambuger01_2.glb';
-    const modelPath = `./${modelName}`;
-    const usdzPath = modelPath.replace('.glb', '.usdz');  
+  
+    // GitHub Pages 기준 절대 경로
+    const basePath = "https://ye-eun-min201.github.io/usdz-hosting";
+    const modelPath = `${basePath}/${modelName}`;
+    const usdzPath = modelPath.replace('.glb', '.usdz');
   
     const viewer = document.getElementById('viewer');
-    viewer.setAttribute('src', modelPath);
-    viewer.setAttribute('usdz-src', usdzPath);
+    viewer.setAttribute('src', modelPath);       // 안드로이드/웹
+    viewer.setAttribute('usdz-src', usdzPath);   // iOS AR Quick Look
   </script>
+  
   
 </body>
 </html>
