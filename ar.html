@@ -102,17 +102,22 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const modelName = urlParams.get('model') || 'hambuger01_2.glb';
+    const modelName = urlParams.get('model') || 'hambuger02_1.glb';  // ✅ 기본값만 원하는 걸로 수정
   
     // GitHub Pages 기준 절대 경로
     const basePath = "https://ye-eun-min201.github.io/usdz-hosting";
     const modelPath = `${basePath}/${modelName}`;
     const usdzPath = modelPath.replace('.glb', '.usdz');
   
+    // 디버깅용
+    console.log("GLB Path:", modelPath);
+    console.log("USDZ Path:", usdzPath);
+  
     const viewer = document.getElementById('viewer');
-    viewer.setAttribute('src', modelPath);       // 안드로이드/웹
-    viewer.setAttribute('usdz-src', usdzPath);   // iOS AR Quick Look
+    viewer.setAttribute('src', modelPath);       // ✅ Android/Web
+    viewer.setAttribute('usdz-src', usdzPath);   // ✅ iOS Quick Look
   </script>
+  
   
   
 </body>
