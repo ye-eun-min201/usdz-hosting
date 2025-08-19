@@ -104,13 +104,12 @@
     const urlParams = new URLSearchParams(window.location.search);
     const modelName = urlParams.get('model') || 'hambuger01_2.glb';
     const modelPath = `./${modelName}`;
-  
-    // .usdz 이름은 glb랑 동일하게 가정 (확장자만 다름)
-    const usdzPath = modelPath.replace('.glb', '.usdz');
+    const usdzPath = modelPath.replace('.glb', '.usdz');  
   
     const viewer = document.getElementById('viewer');
     viewer.setAttribute('src', modelPath);
     viewer.setAttribute('usdz-src', usdzPath);
   </script>
+  
 </body>
 </html>
